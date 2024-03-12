@@ -1,9 +1,14 @@
 import userModel from "../../../DB/models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { loginSchema, registerSchema } from "./user.validation.js";
 export const register = async (req, res) => {
   try {
-    const { userName, email, password } = req.body;
+    const { userName, email, password,cPassword } = req.body;
+   const result= registerSchema.validate({userName, email, password,cPassword},{abortEarly:false});
+   if(result.error){
+    return res.json(result.error)
+  }
     const hasdPassword = await bcrypt.hash(
       password,
       parseInt(process.env.SALTROUND)
@@ -22,6 +27,10 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const result= loginSchema.validate({ email, password},{abortEarly:false});
+  if(result.error){
+    return res.json(result.error)
+  }
     const user = await userModel.findOne({ email });
 
     if (!user) {
